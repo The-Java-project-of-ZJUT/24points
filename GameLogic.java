@@ -77,13 +77,24 @@ public class GameLogic {
 
     //实现基础的运算，即数字相加减乘除
     private static double operate(double a, double b, char op){
-        return switch (op) {
-            case '+' -> a + b;
-            case '-' -> a - b;
-            case '*' -> a * b;
-            case '/' -> a / b;
-            default -> 0;
-        };
+        double result;
+        switch (op) {
+            case '+':
+                result = a + b;
+                break;
+            case '-':
+                result = a - b;
+                break;
+            case '*':
+                result = a * b;
+                break;
+            case '/':
+                result = a / b;
+                break;
+            default:
+                result = 0;
+        }
+        return result;
     }
 
     /*
