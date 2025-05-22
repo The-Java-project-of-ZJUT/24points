@@ -1,7 +1,5 @@
 //这个类负责用户的登陆与注册的相关代码，并储存每个玩家的得分、成就信息
 import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
 
 public class User {
     private String username;
