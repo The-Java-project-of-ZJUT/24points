@@ -1,57 +1,108 @@
-//这个类负责用户的登陆与注册的相关代码，并储存每个玩家的得分、成就
+//这个类负责用户的登陆与注册的相关代码，并储存每个玩家的得分
+//user.txt文件中储存玩家的用户名和密码，格式为：用户名:密码:分数
+//scores.txt文件中储存玩家的用户名和分数，格式为：用户名:分数
 import java.io.*;
 
 public class User {
     private String username;
     private int score;
-    //private Map<String, Integer> achievements; // 存储每个成就的进度
     private static final String USER_FILE = "users.txt"; // 存储用户信息的文件路径
-    //private static final String ACHIEVEMENT_FILE = "achievements.txt"; // 存储成就信息的文件路径
+    private static final String SCORE_FILE = "scores.txt"; // 存储分数信息的文件路径
 
     public User(String username) {
         this.username = username;
-        this.score = 0; // 初始化得分
-        //this.achievements = new HashMap<>(); // 初始化成就
-        //loadAchievements(); // 加载成就信息
+        this.score = loadScore(username); // 加载用户分数
     }
-    
-    // 用户注册
-    public static void register_user(String username,String password) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(USER_FILE, true))) { // 追加模式写入用户信息到文件中
-            writer.write(username + ":" + password); // 用户名和密码以逗号分隔
-            writer.newLine(); // 换行
-        } catch (IOException e) { // 捕获异常
-            e.printStackTrace(); // 输出错误信息
-        }
-    }
-    
-    // 用户登录
-    public static Boolean login_user(String username, String password) { // 静态方法，返回User对象
-        try (BufferedReader reader = new BufferedReader(new FileReader(USER_FILE))) { // 读取用户信息文件
-            String line; // 存储每一行的用户信息
-            while ((line = reader.readLine()) != null) { // 逐行读取
-                String[] parts = line.split(":"); // 以逗号分隔用户名和密码
-                if (parts[0].equals(username) && parts[1].equals(password)) { // 检查用户名和密码是否匹配
-                    return true; // 返回User对象
+
+    // 从文件加载用户分数
+    private int loadScore(String username) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(USER_FILE))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(":");
+                if (parts.length >= 3 && parts[0].equals(username)) {
+                    return Integer.parseInt(parts[2]);
                 }
             }
-        } catch (IOException e) { // 捕获异常
-            e.printStackTrace();// 输出错误信息
+        } catch (IOException | NumberFormatException e) {
+            e.printStackTrace();
         }
-        return false; // 登录失败返回false
-    }
-    //获取玩家名称
-    public String getUsername() { // 方法返回玩家的用户名
-        return username; // 返回用户名
+        return 0; // 默认分数为 0
     }
 
-    //获取玩家的分数
-    public int getScore() { // 方法返回玩家的分数
-        return score; // 返回分数
+    // 用户注册
+    public static void register_user(String username, String password) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(USER_FILE, true))) {
+            writer.write(username + ":" + password );
+            writer.newLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    //更新玩家的分数
-    public void updateScore(int newScore) { // 方法接受一个新的分数作为参数
-        this.score = newScore; // 更新分数
+    // 用户登录
+    public static Boolean login_user(String username, String password) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(USER_FILE))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(":");
+                if (parts.length >= 2 && parts[0].equals(username) && parts[1].equals(password)) {
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;// 登录失败
+    }
+
+    // 获取玩家名称
+    public String getUsername() {
+        return username;
+    }
+
+    // 获取玩家的分数
+    public int getScore() {
+        return score;
+    }
+
+    // 更新玩家的分数并保存到文件
+    public void updateScore(int newScore) {
+        this.score = newScore;
+        saveScore();
+    }
+
+    // 将分数保存到文件
+    private void saveScore() {
+        StringBuilder tempContent = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new FileReader(SCORE_FILE))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(":");
+                if (parts.length >= 2 && parts[0].equals(username)) {
+                    tempContent.append(parts[0]).append(":").append(parts[1]).append(":").append(score).append("\n");
+                } else {
+                    tempContent.append(line).append("\n");
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(SCORE_FILE))) {
+            writer.write(tempContent.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //初始化用户分数为0
+    public static void ResetScore(String username) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(SCORE_FILE, true))) {
+            writer.write(username + ":0"); // 初始分数为 0
+            writer.newLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
